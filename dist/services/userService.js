@@ -77,12 +77,12 @@ function login(credentials) {
             const { email, password } = credentials;
             const user = yield UserDao_1.default.findOne({ email });
             if (!user) {
-                throw new errors_1.InvalidCredentialsError("Invalid Credentials");
+                throw new errors_1.InvalidCredentialsError();
             }
             if (password) {
                 const isValid = yield bcrypt_1.default.compare(password, user.password);
                 if (!isValid) {
-                    throw new errors_1.InvalidCredentialsError("Invalid Credentials");
+                    throw new errors_1.InvalidCredentialsError();
                 }
             }
             const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
@@ -119,7 +119,7 @@ function logout(accessToken) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = yield UserDao_1.default.findOne({ accessToken });
         if (!user) {
-            throw new errors_1.InvalidCredentialsError("Invalid Credentials");
+            throw new errors_1.InvalidCredentialsError();
         }
         user.refreshToken = "";
         user.accessToken = "";

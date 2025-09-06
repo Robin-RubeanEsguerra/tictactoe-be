@@ -20,6 +20,9 @@ function createUser(req, res) {
         const user = req.body;
         try {
             const newUser = yield (0, userService_1.create)(user);
+            newUser.accessToken = "";
+            newUser.refreshToken = "";
+            newUser.accessTokenExpiration = 0;
             res.status(201).json(newUser);
         }
         catch (err) {
@@ -39,7 +42,7 @@ function loginUser(req, res) {
         }
         catch (err) {
             if (err instanceof errors_1.InvalidCredentialsError)
-                res.status(401).json({ message: "Invalid Credentials" });
+                res.status(401).json({ message: err.message });
             else
                 res.status(500).json({ message: err.message });
         }

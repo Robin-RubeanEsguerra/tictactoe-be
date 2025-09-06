@@ -7,6 +7,9 @@ export async function createUser(req: Request, res: Response) {
   const user: IUser = req.body;
   try {
     const newUser = await create(user);
+    newUser.accessToken="";
+    newUser.refreshToken="";
+    newUser.accessTokenExpiration=0;
     res.status(201).json(newUser);
   } catch (err: any) {
     if (err.message.includes("E11000 duplicate key error collection:"))
@@ -22,7 +25,7 @@ export async function loginUser(req: Request, res: Response) {
     res.status(200).json(user);
   } catch (err: any) {
     if (err instanceof InvalidCredentialsError)
-      res.status(401).json({ message: "Invalid Credentials" });
+      res.status(401).json({ message: err.message });
     else res.status(500).json({ message: err.message });
   }
 }

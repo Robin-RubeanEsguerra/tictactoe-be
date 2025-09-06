@@ -1,3 +1,4 @@
+
 import bcrypt from "bcrypt";
 import { config } from "../config";
 import UserDao from "../daos/UserDao";
@@ -27,13 +28,13 @@ export async function login(credentials: Partial<IUser>) {
     const { email, password } = credentials;
     const user = await UserDao.findOne({ email });
     if (!user) {
-    throw new InvalidCredentialsError("Invalid Credentials");
+    throw new InvalidCredentialsError();
     }
 
     if (password) {
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-       throw new InvalidCredentialsError("Invalid Credentials");
+       throw new InvalidCredentialsError();
       }
     }
 
@@ -80,7 +81,7 @@ export async function logout(accessToken: string) {
   const user = await UserDao.findOne({ accessToken });
 
   if (!user) {
-    throw new InvalidCredentialsError("Invalid Credentials");
+    throw new InvalidCredentialsError();
   }
 
   user.refreshToken = "";
