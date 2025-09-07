@@ -6,9 +6,11 @@ import {
   UnableToFindGameInstanceError,
 } from "../utils/errors";
 
-export async function create(gameInstanceData: Partial<IGameInstance>) {
+export async function create(gameInstanceData: Partial<IGameInstance>,userUuid:string) {
   try {
     const newGameInstance = await GameInstanceDao.create(gameInstanceData);
+    newGameInstance.userUuid = userUuid;
+    newGameInstance.save();
     return newGameInstance;
   } catch (error: any) {
     throw error
@@ -62,5 +64,19 @@ export async function endGame(gameUuid: string) {
     return gameInstance;
   } catch (error: any) {
     throw error; 
+  }
+}
+
+
+export async function getByUser(userUuid: string) {
+  try {
+    const gameInstance = await GameInstanceDao.findOne({userUuid });
+    console.log(gameInstance,'where is the game instance');
+    if (!gameInstance) {
+      throw new UnableToFindGameInstanceError();
+    }
+    return gameInstance;
+  } catch (error: any) {
+    throw error;
   }
 }

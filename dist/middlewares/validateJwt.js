@@ -13,6 +13,7 @@ function validateJwt(req, res, next) {
         req.user = {
             email: decode.data.email,
             username: decode.data.username,
+            userUuid: decode.data.userUuid,
         };
         next();
     }

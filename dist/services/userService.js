@@ -90,6 +90,7 @@ function login(credentials) {
             const accessToken = jwt.sign({
                 data: {
                     id: user.id,
+                    userUuid: user.userUuid,
                     email: user.email,
                     username: user.username,
                 },
@@ -98,6 +99,7 @@ function login(credentials) {
             const refreshToken = jwt.sign({
                 data: {
                     id: user.id,
+                    userUuid: user.userUuid,
                     email: user.email,
                     username: user.username,
                 },

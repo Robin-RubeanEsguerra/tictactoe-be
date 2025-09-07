@@ -6,13 +6,15 @@ type Decoded = {
     data: {
         email: string;
         username: string;
+        userUuid: string;
     };
 };
 
-type RequestAuthUser = Request & {
+export type RequestAuthUser = Request & {
     user?: {
         email: string;
         username: string;
+        userUuid: string;
     };
 };
 export function validateJwt(req: RequestAuthUser, res: Response, next: NextFunction) {
@@ -30,6 +32,7 @@ export function validateJwt(req: RequestAuthUser, res: Response, next: NextFunct
         req.user = {
             email: decode.data.email,
             username: decode.data.username,
+            userUuid: decode.data.userUuid,
         };
         next();
     }catch(error){

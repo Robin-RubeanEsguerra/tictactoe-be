@@ -45,6 +45,7 @@ export async function login(credentials: Partial<IUser>) {
         {
           data: {
             id: user.id,
+            userUuid: user.userUuid,
             email: user.email,
             username: user.username,
           },
@@ -56,6 +57,7 @@ export async function login(credentials: Partial<IUser>) {
       {
         data: {
           id: user.id,
+            userUuid: user.userUuid,
           email: user.email,
           username: user.username,
         },

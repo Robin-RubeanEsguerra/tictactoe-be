@@ -34,9 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-;
+const crypto_1 = require("crypto");
 const userSchema = new mongoose_1.Schema({
-    username: { type: String, required: true, },
+    userUuid: {
+        type: String,
+        required: true,
+        default: crypto_1.randomUUID,
+        unique: true,
+        index: true,
+    },
+    username: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     accessToken: { type: String },
