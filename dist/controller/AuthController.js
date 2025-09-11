@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = createUser;
 exports.loginUser = loginUser;
 exports.logoutUser = logoutUser;
-exports.test = test;
+exports.healthCheckUser = healthCheckUser;
 const userService_1 = require("../services/userService");
 const errors_1 = require("../utils/errors");
 function createUser(req, res) {
@@ -74,9 +74,21 @@ function logoutUser(req, res) {
         }
     });
 }
-function test(req, res) {
+function healthCheckUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        return res.status(200).json({ message: "Test endpoint is working!" });
+        const authHeader = req.headers['authorization'];
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: "Access token missing or malformed" });
+        }
+        const accessToken = authHeader.split(' ')[1];
+        try {
+            const result = yield (0, userService_1.healthCheck)(accessToken);
+            return res.status(200).json(result);
+        }
+        catch (error) {
+            console.error("Health check error:", error);
+            return res.status(500).json({ message: "Server Health check failed" });
+        }
     });
 }
-exports.default = { createUser, loginUser, logoutUser, test };
+exports.default = { createUser, loginUser, logoutUser, healthCheckUser };

@@ -95,3 +95,12 @@ export async function logout(accessToken: string) {
   };
   
 }
+
+
+export async function healthCheck(accessToken: string) {
+const user = await UserDao.findOne({ accessToken }).select("-password");
+  if (!user) {
+    throw new InvalidCredentialsError();
+  }
+  return user
+}

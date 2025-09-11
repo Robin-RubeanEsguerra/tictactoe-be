@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { Schemas, validateUser } from '../middlewares/validation';
-import { createUser, loginUser, logoutUser, test } from '../controller/authController';
+import {  Schemas, validateUser } from '../middlewares/validation';
+import { createUser, healthCheckUser, loginUser, logoutUser,  } from '../controller/authController';
 import { validateJwt } from '../middlewares/validateJwt';
 
 const router = express.Router();
@@ -9,6 +9,6 @@ const router = express.Router();
 router.post('/create', validateUser(Schemas.user.create) , createUser);
 router.post('/login', validateUser(Schemas.user.login) , loginUser);
 router.post('/logout', logoutUser);
-router.get('/test',validateJwt, test)
+router.get('/test-user',validateJwt, healthCheckUser)
 
 export default router;

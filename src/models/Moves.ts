@@ -6,8 +6,7 @@ export interface IMoves {
   gameRoundUuid: Types.ObjectId | IGameRound;
   turnNumber: number;
   player: string;
-  x: number;
-  y: number;
+  index: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

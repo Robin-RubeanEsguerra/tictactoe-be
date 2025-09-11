@@ -1,4 +1,5 @@
 import GameInstanceDao, { IGameInstanceModel } from "../daos/GameInstanceDao";
+import GameRoundDao from "../daos/GameRoundDao";
 import { IGameInstance } from "../models/GameInstance";
 import {
   GameInstanceAlreadyCompletedError,
@@ -6,27 +7,41 @@ import {
   UnableToFindGameInstanceError,
 } from "../utils/errors";
 
-export async function create(gameInstanceData: Partial<IGameInstance>,userUuid:string) {
+export async function create(
+  gameInstanceData: Partial<IGameInstance>,
+  userUuid: string
+) {
   try {
     const newGameInstance = await GameInstanceDao.create(gameInstanceData);
     newGameInstance.userUuid = userUuid;
     newGameInstance.save();
     return newGameInstance;
   } catch (error: any) {
-    throw error
+    throw error;
   }
 }
 
-export async function findByUuid(
-  gameUuid: string
-): Promise<IGameInstanceModel | null> {
+export async function findByUuid(gameUuid: string): Promise<any | null> {
   try {
-    const gameInstance = await GameInstanceDao.findOne({ gameUuid }).populate(
-      "gameRounds"
-    );
-    return gameInstance;
+    const gameInstances = await GameInstanceDao.aggregate([
+      { $match: { gameUuid } },
+      {
+        $lookup: {
+          from: "gamerounds",
+          localField: "gameRounds",
+          foreignField: "gameUuid",
+          as: "gameRound",
+        },
+      },
+    ]);
+
+    if (!gameInstances || gameInstances.length === 0) {
+      throw new UnableToFindGameInstanceError();
+    }
+
+    return gameInstances[0]; // Return the first matched game instance
   } catch (error: any) {
-    throw error
+    throw error;
   }
 }
 
@@ -38,7 +53,6 @@ export async function all() {
     throw error;
   }
 }
-
 export async function endGame(gameUuid: string) {
   try {
     const gameInstance = await GameInstanceDao.findOne({ gameUuid });
@@ -46,36 +60,73 @@ export async function endGame(gameUuid: string) {
     if (!gameInstance) {
       throw new UnableToFindGameInstanceError();
     }
+
     if (gameInstance.status === "completed") {
       throw new GameInstanceAlreadyCompletedError();
     }
 
-    let victor: 0 | 1 | 2 = 0;
+    const gameRounds = await GameRoundDao.find({ gameUuid });
 
-    if (gameInstance.score.player1 > gameInstance.score.player2) {
-      victor = 1;
-    } else if (gameInstance.score.player2 > gameInstance.score.player1) {
-      victor = 2;
+    let player1Score = 0;
+    let player2Score = 0;
+    let draws = 0;
+
+    for (const round of gameRounds) {
+      if (round.winner === 1) {
+        player1Score++;
+      } else if (round.winner === 2) {
+        player2Score++;
+      } else if (round.winner === 0) {
+        draws++;
+      }
     }
+
+    // ✅ Update the instance's score first
+    gameInstance.score = {
+      player1: player1Score,
+      player2: player2Score,
+    };
+
+    // ✅ Now determine the winner from updated scores
+    const victor =
+      player1Score > player2Score
+        ? "1"
+        : player2Score > player1Score
+        ? "2"
+        : "tie";
+
     gameInstance.winner = victor;
     gameInstance.status = "completed";
+    gameInstance.roundsPlayed = gameRounds.length;
+    gameInstance.updatedAt = new Date();
 
     await gameInstance.save();
     return gameInstance;
   } catch (error: any) {
-    throw error; 
+    throw error;
   }
 }
 
-
 export async function getByUser(userUuid: string) {
   try {
-    const gameInstance = await GameInstanceDao.findOne({userUuid });
-    console.log(gameInstance,'where is the game instance');
-    if (!gameInstance) {
-      throw new UnableToFindGameInstanceError();
+    const gameInstances = await GameInstanceDao.find({ userUuid });
+    if (!gameInstances || gameInstances.length === 0) {
+      return null;
     }
-    return gameInstance;
+
+    const cleanedGameInstances = await Promise.all(
+      gameInstances.map(async (gameInstance) => {
+        const gameRounds = await GameRoundDao.find({
+          gameUuid: gameInstance.gameUuid,
+        });
+        return {
+          ...gameInstance.toObject(), 
+          gameRounds,
+        };
+      })  
+    );
+
+    return {items:cleanedGameInstances};
   } catch (error: any) {
     throw error;
   }

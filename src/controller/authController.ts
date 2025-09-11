@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { create, login, logout } from "../services/userService";
+import { create, healthCheck, login, logout } from "../services/userService";
 import { IUser } from "../models/User";
 import { InvalidCredentialsError } from "../utils/errors";
 
@@ -61,7 +61,21 @@ export async function logoutUser(req: Request, res: Response) {
 
 
 
-export async function test(req: Request, res: Response) {
-  return res.status(200).json({ message: "Test endpoint is working!" });
+export async function healthCheckUser(req: Request, res: Response) {
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: "Access token missing or malformed" });
+  }
+
+  const accessToken = authHeader.split(' ')[1];
+
+  try {
+    const result = await healthCheck(accessToken);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Health check error:", error);
+    return res.status(500).json({ message: "Server Health check failed" });
+  }
 }
-export default { createUser, loginUser, logoutUser, test };
+export default { createUser, loginUser, logoutUser, healthCheckUser };

@@ -5,7 +5,7 @@ export interface IGameInstance {
   gameUuid: string;
   userUuid: string|IUser;
   gameRounds: Array<string | IGameRound>; 
-  winner: number;
+  winner: string;
   score: { player1: number; player2: number };
   roundsPlayed: number;
   createdAt?: Date;

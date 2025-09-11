@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { all, create, endGame, getByUser } from "../services/gameInstanceService";
+import { all, create, endGame, findByUuid, getByUser } from "../services/gameInstanceService";
 import { AppError } from "../utils/errors";
 
 
@@ -70,3 +70,19 @@ export async function getGameInstanceByUser(req:Request, res: Response) {
     }
   }
 }
+
+export async function getGameInstanceByUuid(req: Request, res: Response) {
+    try {
+      const { gameUuid } = req.params;
+      const gameInstance = await findByUuid(gameUuid);
+      res.status(200).json(gameInstance);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        res.status(error.statusCode).json({ message: error.message });
+      } else {
+        res
+          .status(500)
+          .json({ message: error });
+      }
+    }
+  } 

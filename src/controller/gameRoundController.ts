@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { create, endRound } from "../services/gameRoundService";
+import { create, endRound, gameRoundsByGameUuid } from "../services/gameRoundService";
 import { AppError } from "../utils/errors";
 
 export async function createGameRound(req: Request, res: Response) {
@@ -29,6 +29,19 @@ export async function endGameRound(req: Request, res: Response) {
       res.status(error.statusCode).json({ message: error.message });
     } else {
       res.status(500).json({ message: "An error occurred while ending the game round" });
+    }
+  }
+}
+export async function getGameRoundsByGameUuid(req: Request, res: Response) {
+  try {
+    const { gameUuid } = req.params;
+    const gameRounds = await gameRoundsByGameUuid(gameUuid);
+    res.status(200).json(gameRounds);
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An error occurred while getting the game rounds by game uuid" });
     }
   }
 }

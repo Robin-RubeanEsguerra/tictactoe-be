@@ -1,7 +1,14 @@
 import GameInstanceDao from "../daos/GameInstanceDao";
 import GameRoundDao from "../daos/GameRoundDao";
 import { IGameRound } from "../models/GameRound";
-import { GameInstanceAlreadyCompletedError, GameRoundAlreadyCompletedError, MissingGameUuidError, UnableToCreateGameInstanceError, UnableToFindGameInstanceError, UnableToFindGameRoundError } from "../utils/errors";
+import {
+  GameInstanceAlreadyCompletedError,
+  GameRoundAlreadyCompletedError,
+  MissingGameUuidError,
+  UnableToCreateGameInstanceError,
+  UnableToFindGameInstanceError,
+  UnableToFindGameRoundError,
+} from "../utils/errors";
 
 export async function create(
   gameRoundData: Partial<IGameRound>,
@@ -17,15 +24,15 @@ export async function create(
       throw new UnableToFindGameInstanceError();
     }
 
-    if(gameInstance.status === "completed") {
+    if (gameInstance.status === "completed") {
       throw new GameInstanceAlreadyCompletedError();
     }
-    
+
     const newGameRound = new GameRoundDao({
       ...gameRoundData,
       gameUuid: gameInstance.gameUuid,
       gameInstance: gameInstance._id,
-      status: "ongoing", 
+      status: "ongoing",
     });
 
     const updateGameInstance = await GameInstanceDao.findOneAndUpdate(
@@ -41,13 +48,10 @@ export async function create(
 
     return { savedGameRound, savedGameInstance: updateGameInstance };
   } catch (error: any) {
-    throw  error;
+    throw error;
   }
 }
-export async function endRound(
-  gameRoundUuid: string,
-  winner: number 
-) {
+export async function endRound(gameRoundUuid: string, winner: number) {
   try {
     const gameRound = await GameRoundDao.findOne({ gameRoundUuid });
 
@@ -63,7 +67,9 @@ export async function endRound(
     gameRound.status = "completed";
     await gameRound.save();
 
-    const gameInstance = await GameInstanceDao.findOne({ gameUuid: gameRound.gameUuid });
+    const gameInstance = await GameInstanceDao.findOne({
+      gameUuid: gameRound.gameUuid,
+    });
     if (!gameInstance) {
       throw new UnableToCreateGameInstanceError();
     }
@@ -85,6 +91,35 @@ export async function endRound(
       updatedGameRound: gameRound,
       updatedGameInstance,
     };
+  } catch (error: any) {
+    throw error;
+  }
+}
+export async function gameRoundsByGameUuid(gameUuid: string) {
+  try {
+    const gameRounds = await GameRoundDao.find({ gameUuid });
+    let player1Score = 0;
+    let player2Score = 0;
+    let draws = 0;
+
+    for (const round of gameRounds) {
+      if (round.winner === 1) {
+        player1Score++;
+      } else if (round.winner === 2) {
+        player2Score++;
+      } else if (round.winner === 0) {
+        draws++;
+      }
+    }
+
+    const data = {
+      player1Score: player1Score,
+      player2Score: player2Score,
+      draws: draws,
+      rounds: gameRounds.length,
+      gameRounds,
+    };
+    return data;
   } catch (error: any) {
     throw error;
   }

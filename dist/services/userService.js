@@ -48,6 +48,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.create = create;
 exports.login = login;
 exports.logout = logout;
+exports.healthCheck = healthCheck;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = require("../config");
 const UserDao_1 = __importDefault(require("../daos/UserDao"));
@@ -130,5 +131,14 @@ function logout(accessToken) {
         return {
             success: true,
         };
+    });
+}
+function healthCheck(accessToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield UserDao_1.default.findOne({ accessToken }).select("-password");
+        if (!user) {
+            throw new errors_1.InvalidCredentialsError();
+        }
+        return user;
     });
 }

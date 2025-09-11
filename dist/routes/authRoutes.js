@@ -11,5 +11,5 @@ const router = express_1.default.Router();
 router.post('/create', (0, validation_1.validateUser)(validation_1.Schemas.user.create), authController_1.createUser);
 router.post('/login', (0, validation_1.validateUser)(validation_1.Schemas.user.login), authController_1.loginUser);
 router.post('/logout', authController_1.logoutUser);
-router.get('/test', validateJwt_1.validateJwt, authController_1.test);
+router.get('/test-user', validateJwt_1.validateJwt, authController_1.healthCheckUser);
 exports.default = router;

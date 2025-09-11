@@ -14,8 +14,7 @@ const movesSchema = new Schema(
     },
     turnNumber: { type: Number, required: true },
     player: { type: String, required: true },
-    x: { type: Number, required: true,  },
-    y: { type: Number, required: true, },
+    index: { type: Number, required: true, },
   },
   { timestamps: true }
 );
