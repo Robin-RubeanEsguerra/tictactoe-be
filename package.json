@@ -9,7 +9,7 @@
     "prestart": "npm run build",
     "start": "node ./dist/server.ts",
     "predev": "npm run build",
-    "dev": "concurrently \"tsc -w\" \"nodemon ./dist/server.js\""
+    "dev": "concurrently \"tsc -w\" \"nodemon ./dist/server.ts\""
   },
   "keywords": [],
   "author": "",
